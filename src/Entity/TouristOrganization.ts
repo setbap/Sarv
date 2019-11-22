@@ -8,6 +8,8 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn,
 	BeforeInsert,
+	JoinColumn,
+	OneToOne,
 } from "typeorm";
 import { User } from "./User";
 import * as bcrypt from "bcryptjs";
@@ -25,7 +27,7 @@ export class TouristOrganization extends BaseEntity {
 	@Column("varchar", { length: 255 })
 	description: string;
 
-	@Column("int")
+	@Column("int", { nullable: true })
 	phoneNumber: number;
 
 	@Column()
@@ -33,6 +35,13 @@ export class TouristOrganization extends BaseEntity {
 
 	@Column()
 	password: string;
+
+	@Column()
+	orgCreatorId: number;
+
+	@OneToOne((type) => User)
+	@JoinColumn()
+	orgCreator: User;
 
 	@OneToMany(
 		(type) => Tour,
@@ -46,10 +55,10 @@ export class TouristOrganization extends BaseEntity {
 	)
 	leaders: User[];
 
-	@Column("int")
+	@Column("int", { default: 0 })
 	numberOfCommnet: number;
 
-	@Column("double precision")
+	@Column("double precision", { default: 0 })
 	avgRate: number;
 
 	@OneToMany(

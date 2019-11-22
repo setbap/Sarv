@@ -8,6 +8,7 @@ import {
 	ManyToMany,
 	ManyToOne,
 	OneToMany,
+	JoinTable,
 } from "typeorm";
 import { Place } from "./Place";
 import { User } from "./User";
@@ -28,13 +29,23 @@ export class Tour extends BaseEntity {
 	@Column("int")
 	remainingCapacity: number;
 
+	@Column("int")
+	sourceId: number;
 	@OneToOne((type) => Place)
 	@JoinColumn()
 	source: Place;
 
+	@Column("int")
+	destinationId: number;
 	@OneToOne((type) => Place)
 	@JoinColumn()
 	destination: Place;
+
+	@Column("timestamptz")
+	startDate: Date;
+
+	@Column("timestamptz")
+	finishDate: Date;
 
 	@Column("double precision")
 	hardShipLevel: number;
@@ -49,7 +60,7 @@ export class Tour extends BaseEntity {
 		(type) => User,
 		(user) => user.tours,
 	)
-	@JoinColumn()
+	@JoinTable()
 	users: User[];
 
 	@ManyToOne(
