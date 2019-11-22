@@ -9,6 +9,10 @@ import { User, UserGender } from "./Entity/User";
 import { TouristOrganization } from "./Entity/TouristOrganization";
 import { Tour } from "./Entity/Tour";
 import { Place } from "./Entity/Place";
+import { errorHandler } from "./middleware/error";
+import * as cookieParser from "cookie-parser";
+import * as fileupload from "express-fileupload";
+import routes from "./Routes";
 // import routes from "./routes";
 
 //Connects to the Database -> then starts the express
@@ -23,6 +27,12 @@ createConnection()
 		app.use(cors());
 		app.use(helmet());
 		app.use(bodyParser.json());
+		app.use(cookieParser());
+		app.use(fileupload());
+
+		app.use("/", routes);
+
+		app.use(errorHandler);
 
 		//Set all routes from routes folder
 		// app.use("/", routes);
@@ -97,6 +107,9 @@ createConnection()
 	})
 	.catch((error) => console.log(error));
 
-process.on("unhandledRejection", (err: any, promise) => {
-	console.error(`error ${err.message}`);
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err: any, promise: Promise<any>) => {
+	console.log(`Error: ${err.message}`);
+	// Close server & exit process
+	// server.close(() => process.exit(1));
 });
