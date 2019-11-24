@@ -1,4 +1,4 @@
-const ErrorResponse = require("../utils/errorResponse");
+import { ErrorResponse } from "../utils/errorResponse";
 import { Request, Response, NextFunction } from "express";
 
 export const errorHandler = (
@@ -12,16 +12,16 @@ export const errorHandler = (
 	error.message = err.message;
 
 	// Log to console for dev
-	console.log(err);
+	console.log("my log ", err);
 
 	// Mongoose bad ObjectId
-	if (err.name === "CastError") {
+	if (err.name === "EntityNotFound") {
 		const message = `Resource not found`;
 		error = new ErrorResponse(message, 404);
 	}
 
 	// Mongoose duplicate key
-	if (err.code === 11000) {
+	if (err.code === 23505) {
 		const message = "Duplicate field value entered";
 		error = new ErrorResponse(message, 400);
 	}
@@ -31,7 +31,7 @@ export const errorHandler = (
 		const message = Object.values(err.errors).map(
 			(val: any) => val.message,
 		);
-		error = new ErrorResponse(message, 400);
+		error = new ErrorResponse(message.toString(), 400);
 	}
 
 	res.status(error.statusCode || 500).json({

@@ -41,11 +41,11 @@ createConnection()
 		// const user = new User();
 		// user.name = "sina";
 		// user.lastname = "ebr";
-		// user.email = "ebrsina4";
+		// user.email = "ebrsina5312";
 		// user.password = "jesus";
 		// user.dob = new Date();
 		// user.role = UserGender.MAN;
-		// await user.save();\
+		// await user.save();
 
 		// const me = await User.findOne(3);
 		// const org = new TouristOrganization();
@@ -86,18 +86,18 @@ createConnection()
 
 		// const me = await User.findOne();
 		// console.log(me);
-		const org1 = await Tour.findOne();
+		// const org1 = await Tour.findOne();
 		// await getConnection()
 		// 	.createQueryBuilder()
 		// 	.relation(Tour, "users")
 		// 	.of(org1)
 		// 	.add(me);
-		const postRepository = getRepository(Tour);
-		const post = await postRepository.findOne(2, { relations: ["users"] });
-		post.users.push(me);
-		post.remainingCapacity--;
-		await postRepository.save(post);
-		console.log(org1);
+		// const postRepository = getRepository(Tour);
+		// const post = await postRepository.findOne(2, { relations: ["users"] });
+		// post.users.push(me);
+		// post.remainingCapacity--;
+		// await postRepository.save(post);
+		// console.log(org1);
 
 		app.listen(PORT, () => {
 			console.log(
