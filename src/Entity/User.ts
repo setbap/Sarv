@@ -8,10 +8,8 @@ import {
 	BaseEntity,
 	ManyToMany,
 	ManyToOne,
-	BeforeInsert,
 	OneToMany,
 } from "typeorm";
-import * as bcrypt from "bcryptjs";
 import { TouristOrganization } from "./TouristOrganization";
 import { Tour } from "./Tour";
 import { TourCommnet } from "./TourComment";
@@ -20,11 +18,10 @@ import {
 	Length,
 	IsEmail,
 	MinLength,
-	IsMobilePhone,
+
 	IsOptional,
 	IsDate,
 	IsEnum,
-	MaxLength,
 } from "class-validator";
 import { IsEmailAlreadyExist } from "../validation/isEmailAlreadyExist";
 
@@ -57,7 +54,7 @@ export class User extends BaseEntity {
 	//email fard
 	@Column()
 	@IsEmail()
-	@IsEmailAlreadyExist({ message: "email already in use" })
+	// @IsEmailAlreadyExist({ message: "email already in use" })
 	email: string;
 
 	//ramze fard

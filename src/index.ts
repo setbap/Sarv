@@ -5,13 +5,12 @@ import * as bodyParser from "body-parser";
 import * as helmet from "helmet";
 import * as cors from "cors";
 import * as dotenv from "dotenv";
-import { User, UserGender } from "./Entity/User";
-import { TouristOrganization } from "./Entity/TouristOrganization";
-import { Tour } from "./Entity/Tour";
-import { Place } from "./Entity/Place";
+import { User } from "./Entity/User";
+
 import { errorHandler } from "./middleware/error";
 import * as cookieParser from "cookie-parser";
 import * as fileupload from "express-fileupload";
+import { join } from 'path'
 import routes from "./Routes";
 // import routes from "./routes";
 
@@ -20,8 +19,9 @@ createConnection()
 	.then(async (connection) => {
 		// Create a new express application instance
 		const app = express();
-		dotenv.config({ path: "../config/config.env" });
+		dotenv.config({ path: join(__dirname, '..', 'config', 'config.env') });
 		const PORT = process.env.PORT || 5000;
+
 
 		// Call midlewares
 		app.use(cors());
@@ -66,7 +66,7 @@ createConnection()
 		// p2.longitude = 50.23232;
 		// await p1.save();
 		// await p2.save();
-		const me = await User.findOne(2);
+		// const me = await User.findOne();
 		// const org = await TouristOrganization.findOne();
 
 		// const tour = new Tour();
