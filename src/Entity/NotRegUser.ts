@@ -6,41 +6,23 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn,
 	BaseEntity,
-	ManyToMany,
-	ManyToOne,
-	BeforeInsert,
-	OneToMany,
 } from "typeorm";
-import * as bcrypt from "bcryptjs";
-import { TouristOrganization } from "./TouristOrganization";
-import { Tour } from "./Tour";
-import { TourCommnet } from "./TourComment";
-import { OrganizationComment } from "./OrganizationComment";
+
 import {
 	Length,
 	IsEmail,
 	MinLength,
-	IsMobilePhone,
 	IsOptional,
 	IsDate,
 	IsEnum,
-	MaxLength,
 } from "class-validator";
 import { IsEmailAlreadyExist } from "../validation/isEmailAlreadyExist";
-
-export enum UserGender {
-	MAN = "MAN",
-	WOMAN = "WOMAN",
-}
-
-export enum UserRoll {
-	USER = "USER",
-	TOUR_LEADER = "TOUR_LEADER",
-}
+import { UserGender } from "./User";
+import { isEmailAlreadyExistNotRegUser } from "../validation/isEmailAlreadyExistNotRegUser";
 
 @Entity()
 @Unique(["email"])
-export class User extends BaseEntity {
+export class NotRegUser extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
 
@@ -57,6 +39,7 @@ export class User extends BaseEntity {
 	//email fard
 	@Column()
 	@IsEmail()
+	@isEmailAlreadyExistNotRegUser({ message: "email already in use" })
 	@IsEmailAlreadyExist({ message: "email already in use" })
 	email: string;
 
@@ -90,42 +73,8 @@ export class User extends BaseEntity {
 	@IsEnum(UserGender)
 	gender: UserGender;
 
-	@Column({
-		type: "enum",
-		enum: UserRoll,
-		default: UserRoll.USER,
-	})
-	@IsEnum(UserGender)
-	@IsOptional()
-	roll: UserRoll;
-
-	// age fardi tour lider bashe bayad id sazmani ke tour leader hast sabt beshe
-	@ManyToOne(
-		(type) => TouristOrganization,
-		(tg) => tg.leaders,
-	)
-	organization: TouristOrganization;
-
-	// tour haei ke karbar tosh sabte nam karde
-	@ManyToMany(
-		(type) => Tour,
-		(tour) => tour.users,
-	)
-	tours: Tour[];
-
-	// comment haei ke fard baraye tour mizare
-	@OneToMany(
-		() => TourCommnet,
-		(tCmt) => tCmt.user,
-	)
-	tourCommnets: TourCommnet[];
-
-	// comment haei ke fard baraye sazman mizare
-	@OneToMany(
-		() => OrganizationComment,
-		(oCmt) => oCmt.user,
-	)
-	organizationCommnets: OrganizationComment[];
+	@Column("int")
+	validationNumber: number;
 
 	//  tarikhe ozviate fard dar site ra negahdari mikonad
 	@Column()
