@@ -21,7 +21,7 @@ import {
 
 	IsOptional,
 	IsDate,
-	IsEnum,
+	IsEnum, IsInt,
 } from "class-validator";
 import { IsEmailAlreadyExist } from "../validation/isEmailAlreadyExist";
 
@@ -95,6 +95,17 @@ export class User extends BaseEntity {
 	@IsEnum(UserGender)
 	@IsOptional()
 	roll: UserRoll;
+
+	@Column('timestamp without time zone',{nullable:true})
+	@IsDate()
+	@IsOptional()
+	resetPasswordExpireTime : Date;
+
+	@Column({nullable:true})
+	@IsInt()
+	@IsOptional()
+	resetPasswordToken : string;
+
 
 	// age fardi tour lider bashe bayad id sazmani ke tour leader hast sabt beshe
 	@ManyToOne(

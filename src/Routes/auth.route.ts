@@ -7,5 +7,6 @@ const router = Router();
 router.post("/signup", AuthController.signin);
 router.post("/validate_user", AuthController.validateUser);
 router.post("/login", AuthController.login);
+router.post("/reset_password", AuthController.resetPassword);
 
 export default router;
