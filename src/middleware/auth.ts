@@ -22,9 +22,9 @@ export const protect = asyncHandler(
 			token = req.headers.authorization.split(" ")[1];
 			// Set token from cookie
 		}
-		// else if (req.cookies.token) {
-		//   token = req.cookies.token;
-		// }
+		else if (req.cookies.token) {
+			token = req.cookies.token;
+		}
 
 		// Make sure token exists
 		if (!token) {
@@ -35,9 +35,9 @@ export const protect = asyncHandler(
 
 		try {
 			// Verify token
-			const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-			req.user = await User.findOneOrFail(decoded.id);
+			const decoded: any = jwt.verify(token, process.env.JWT_SECRET);
+			req.user = decoded;
+			// req.user = await User.findOneOrFail(decoded.id);
 
 			next();
 		} catch (err) {

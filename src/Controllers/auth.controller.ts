@@ -1,18 +1,34 @@
-import {Request, Response, NextFunction} from "express";
+import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcryptjs";
-import {getConnection, getRepository} from "typeorm";
-import {User, UserGender} from "../entity/User";
-import {NotRegUser} from "../Entity/NotRegUser";
-import {asyncHandler} from "../middleware/async";
-import {ErrorResponse} from "../utils/errorResponse";
-import {validate} from "class-validator";
-import {validateUserNumber} from "../validation/auth/UserValidate";
-import {LoginValidate} from "../validation/auth/LoginValidate";
-import {ResetPasswordValidate} from "../validation/auth/resetPasswordValidate";
-import {randomBytes} from 'crypto';
+import { getConnection, getRepository } from "typeorm";
+import { User, UserGender } from "../entity/User";
+import { NotRegUser } from "../Entity/NotRegUser";
+import { asyncHandler } from "../middleware/async";
+import { ErrorResponse } from "../utils/errorResponse";
+import { validate } from "class-validator";
+import { validateUserNumber } from "../validation/auth/UserValidate";
+import { LoginValidate } from "../validation/auth/LoginValidate";
+import { ResetPasswordValidate } from "../validation/auth/resetPasswordValidate";
+import { randomBytes } from 'crypto';
 import * as buffer from "buffer";
-import {SetNewResetPassowrd} from "../validation/auth/SetNewResetPassowrd";
+import { SetNewResetPassowrd } from "../validation/auth/SetNewResetPassowrd";
+
+interface DecodedUserInterface {
+    "id": number;
+    "email": string;
+    "gender": string;
+    "roll": string;
+    "dob": Date;
+    "name": string;
+    "lastname": string;
+    "iat": number;
+    "exp": number;
+}
+
+export interface RequestWithDecodedUser extends Request {
+    user: DecodedUserInterface;
+}
 
 
 interface UserInterface {
@@ -88,7 +104,7 @@ export class AuthController {
             }
             const user = new User();
             const not_reg_user = await NotRegUser.findOneOrFail({
-                where: {email: reqData.email},
+                where: { email: reqData.email },
             });
             if (
                 not_reg_user.createdAt.getTime() + +(1000 * 60 * 60 * 24) >
@@ -103,7 +119,7 @@ export class AuthController {
                 user.gender = not_reg_user.gender;
                 user.phoneNumber = not_reg_user.phoneNumber;
                 await user.save();
-                await NotRegUser.delete({email: reqData.email});
+                await NotRegUser.delete({ email: reqData.email });
                 return res.json({
                     status: "user created",
                     number: user,
@@ -128,7 +144,7 @@ export class AuthController {
                 return next(new ErrorResponse("error in validate", 404));
             }
 
-            const user = await User.findOne({where: {email: reqData.email}});
+            const user = await User.findOne({ where: { email: reqData.email } });
             if (!user) {
                 return next(new ErrorResponse("email or password is incorrect", 404));
             }
@@ -137,9 +153,9 @@ export class AuthController {
                 return next(new ErrorResponse("email or password is incorrect", 404));
             }
 
-            const {id, email, gender, roll, dob, name, lastname} = user;
+            const { id, email, gender, roll, dob, name, lastname } = user;
 
-            const token = jwt.sign({id, email, gender, roll, dob, name, lastname}, process.env.JWT_SECRET, {
+            const token = jwt.sign({ id, email, gender, roll, dob, name, lastname }, process.env.JWT_SECRET, {
                 expiresIn: process.env.JWT_EXPIRE
             });
 
@@ -176,15 +192,15 @@ export class AuthController {
             return next(new ErrorResponse('error in validate', 404));
         }
         const random = randomBytes(32, async (err: Error, buf: Buffer) => {
-            const user = await User.findOneOrFail({where: {email: reqData.email}});
+            const user = await User.findOneOrFail({ where: { email: reqData.email } });
             const expDate = new Date(Date.now() + 3600000);
             // @ts-ignore
             const token = buf.toString('hex');
             await getConnection()
                 .createQueryBuilder()
                 .update(User)
-                .set({resetPasswordExpireTime: expDate, resetPasswordToken: token})
-                .where("email = :email", {email: reqData.email})
+                .set({ resetPasswordExpireTime: expDate, resetPasswordToken: token })
+                .where("email = :email", { email: reqData.email })
                 .execute();
             return res.json({
                 token, expDate
@@ -203,19 +219,23 @@ export class AuthController {
             return next(new ErrorResponse('error in validate', 404));
         }
 
-        const user = await User.findOneOrFail({where: {email: reqData.email}});
+        const user = await User.findOneOrFail({ where: { email: reqData.email } });
 
         const password = await bcrypt.hash(reqData.newPassword, 10);
         await getConnection()
             .createQueryBuilder()
             .update(User)
-            .set({resetPasswordExpireTime: null, resetPasswordToken: null, password:password})
-            .where("email = :email", {email: reqData.email})
+            .set({ resetPasswordExpireTime: null, resetPasswordToken: null, password: password })
+            .where("email = :email", { email: reqData.email })
             .execute();
         return res.json({
             status: 'done'
         });
     });
+
+    static getMe = asyncHandler(async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+        res.json(req.user)
+    })
 
 
 }
