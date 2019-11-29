@@ -3,8 +3,8 @@
 ## Todo
 
 -   [x] create user
--   [] login
--   [] protected route
+-   [x] login
+-   [x] protected route
 -   [] create organization
 -   [] log in as organiaztion
 -   [] change org pass

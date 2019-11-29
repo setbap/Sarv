@@ -77,8 +77,4 @@ export class TouristOrganization extends BaseEntity {
 	@UpdateDateColumn()
 	updatedAt: Date;
 
-	@BeforeInsert()
-	async hashPasswordBeforeInsert() {
-		this.password = await bcrypt.hash(this.password, 10);
-	}
 }

@@ -61,7 +61,7 @@ interface setNewResetPasswordInterface {
     newPassword: string
 }
 
-export class AuthController {
+export class UserAuthController {
     static signin = asyncHandler(
         async (req: Request, res: Response, next: NextFunction) => {
             const reqData = <UserInterface>req.body;
