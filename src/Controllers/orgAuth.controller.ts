@@ -20,9 +20,7 @@ interface OrgInterface {
   name: string;
   description: string;
   phoneNumber?: number;
-  email: string;
   password: string;
-  orgCreatorId: number;
 }
 
 interface UserValidateInterface {
@@ -46,7 +44,7 @@ interface setNewResetPasswordInterface {
 }
 
 export class OrgAuthController {
-  static signin = asyncHandler(
+  static orgCreate = asyncHandler(
     async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
       const reqData = <OrgInterface>req.body;
       const org = new TouristOrganization();
@@ -58,7 +56,7 @@ export class OrgAuthController {
       org.phoneNumber = reqData.phoneNumber;
       const errors = await validate(org);
       if (errors.length > 0) {
-        console.log(errors);
+        console.log("my log", errors);
         return next(new ErrorResponse("error in validate", 404));
       } else {
         org.password = await bcrypt.hash(reqData.password, 10);
@@ -71,97 +69,59 @@ export class OrgAuthController {
     }
   );
 
-  // static validateUser = asyncHandler(
-  //     async (req: Request, res: Response, next: NextFunction) => {
-  //         const reqData = <UserValidateInterface>req.body;
-  //         const validator = new validateUserNumber();
-  //         validator.email = reqData.email;
-  //         validator.validateNumber = reqData.validateNumber;
-  //         const errors = await validate(validator);
-  //         if (errors.length > 0) {
-  //             console.log(errors);
-  //             return next(new ErrorResponse("error in validate", 404));
-  //         }
-  //         const user = new User();
-  //         const not_reg_user = await NotRegUser.findOneOrFail({
-  //             where: { email: reqData.email },
-  //         });
-  //         if (
-  //             not_reg_user.createdAt.getTime() + +(1000 * 60 * 60 * 24) >
-  //             Date.now() &&
-  //             not_reg_user.validationNumber === reqData.validateNumber
-  //         ) {
-  //             user.name = not_reg_user.name;
-  //             user.lastname = not_reg_user.lastname;
-  //             user.email = not_reg_user.email;
-  //             user.password = not_reg_user.password;
-  //             user.dob = not_reg_user.dob;
-  //             user.gender = not_reg_user.gender;
-  //             user.phoneNumber = not_reg_user.phoneNumber;
-  //             await user.save();
-  //             await NotRegUser.delete({ email: reqData.email });
-  //             return res.json({
-  //                 status: "user created",
-  //                 number: user,
-  //             });
-  //         } else {
-  //             return res.json({
-  //                 status: "fail",
-  //             });
-  //         }
-  //
-  //     },
-  // );
-  //
-  // static login = asyncHandler(
-  //     async (req: Request, res: Response, next: NextFunction) => {
-  //         const reqData = <LoginInterface>req.body;
-  //         const validator = new LoginValidate();
-  //         validator.email = reqData.email;
-  //         validator.password = reqData.password;
-  //         const errors = await validate(validator);
-  //         if (errors.length > 0) {
-  //             return next(new ErrorResponse("error in validate", 404));
-  //         }
-  //
-  //         const user = await User.findOne({ where: { email: reqData.email } });
-  //         if (!user) {
-  //             return next(new ErrorResponse("email or password is incorrect", 404));
-  //         }
-  //         const pass = await bcrypt.compare(reqData.password, user.password);
-  //         if (!pass) {
-  //             return next(new ErrorResponse("email or password is incorrect", 404));
-  //         }
-  //
-  //         const { id, email, gender, roll, dob, name, lastname } = user;
-  //
-  //         const token = jwt.sign({ id, email, gender, roll, dob, name, lastname }, process.env.JWT_SECRET, {
-  //             expiresIn: process.env.JWT_EXPIRE
-  //         });
-  //
-  //         const options = {
-  //             expires: new Date(
-  //                 Date.now() + +process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-  //             ),
-  //             httpOnly: true,
-  //             secure: false
-  //         };
-  //
-  //         if (process.env.NODE_ENV === 'production') {
-  //             options.secure = true;
-  //         }
-  //
-  //         return res
-  //             .status(200)
-  //             .cookie('token', token, options)
-  //             .json({
-  //                 success: true,
-  //                 token
-  //             });
-  //
-  //
-  //     },
-  // );
+  static orgLogin = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const reqData = <LoginInterface>req.body;
+      const validator = new LoginValidate();
+      validator.email = reqData.email;
+      validator.password = reqData.password;
+      const errors = await validate(validator);
+      if (errors.length > 0) {
+        return next(new ErrorResponse("error in validate", 404));
+      }
+
+      const org = await TouristOrganization.findOne({
+        where: { email: reqData.email }
+      });
+      if (!org) {
+        return next(new ErrorResponse("email or password is incorrect", 404));
+      }
+      const pass = await bcrypt.compare(reqData.password, org.password);
+      if (!pass) {
+        return next(new ErrorResponse("email or password is incorrect", 404));
+      }
+
+      const { id, email, name, description } = org;
+
+      const token = jwt.sign(
+        { id, email, roll: "ADMIN", name, description },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.JWT_EXPIRE
+        }
+      );
+
+      const options = {
+        expires: new Date(
+          Date.now() + +process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+        ),
+        httpOnly: true,
+        secure: false
+      };
+
+      if (process.env.NODE_ENV === "production") {
+        options.secure = true;
+      }
+
+      return res
+        .status(200)
+        .cookie("token", token, options)
+        .json({
+          success: true,
+          token
+        });
+    }
+  );
   //
   // static resetPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   //     const reqData = <resetPasswordInterface>req.body;
