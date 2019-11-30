@@ -15,6 +15,7 @@ import * as buffer from "buffer";
 import { SetNewResetPassowrd } from "../validation/auth/SetNewResetPassowrd";
 import { RequestWithDecodedUser } from "./userAuth.controller";
 import { TouristOrganization } from "../entity/TouristOrganization";
+import { NotAcceptedTouristOrganization } from "../entity/NotAcceptedTouristOrganization";
 
 interface OrgInterface {
   name: string;
@@ -33,6 +34,11 @@ interface LoginInterface {
   email: string;
 }
 
+interface OrganizationAcceptInterface {
+  accpeted: boolean;
+  orgId: number;
+}
+
 interface resetPasswordInterface {
   email: string;
 }
@@ -47,7 +53,7 @@ export class OrgAuthController {
   static orgCreate = asyncHandler(
     async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
       const reqData = <OrgInterface>req.body;
-      const org = new TouristOrganization();
+      const org = new NotAcceptedTouristOrganization();
       org.name = reqData.name;
       org.description = reqData.description;
       org.email = req.user.email;
@@ -62,10 +68,36 @@ export class OrgAuthController {
         org.password = await bcrypt.hash(reqData.password, 10);
         await org.save();
       }
-
       res.json({
         status: "org created"
       });
+    }
+  );
+
+  static orgAccept = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const reqData = <OrganizationAcceptInterface>req.body;
+      const notAccpeted = await NotAcceptedTouristOrganization.findOneOrFail(
+        reqData.orgId
+      );
+      if (reqData.accpeted) {
+        const to = new TouristOrganization();
+        to.name = notAccpeted.name;
+        to.email = notAccpeted.email;
+        to.description = notAccpeted.description;
+        to.phoneNumber = notAccpeted.phoneNumber;
+        to.password = notAccpeted.password;
+        to.orgCreatorId = notAccpeted.orgCreatorId;
+        await to.save();
+        await NotAcceptedTouristOrganization.delete(reqData.orgId);
+        return res.json({
+          status: "congratulations!! your org accpeted"
+        });
+      } else {
+        return res.json({
+          status: "hey your org did'n accpeted"
+        });
+      }
     }
   );
 
@@ -122,58 +154,72 @@ export class OrgAuthController {
         });
     }
   );
-  //
-  // static resetPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  //     const reqData = <resetPasswordInterface>req.body;
-  //     const validator = new ResetPasswordValidate();
-  //     validator.email = reqData.email;
-  //     const errors = await validate(validator);
-  //     if (errors.length > 0) {
-  //         return next(new ErrorResponse('error in validate', 404));
-  //     }
-  //     const random = randomBytes(32, async (err: Error, buf: Buffer) => {
-  //         const user = await User.findOneOrFail({ where: { email: reqData.email } });
-  //         const expDate = new Date(Date.now() + 3600000);
-  //         // @ts-ignore
-  //         const token = buf.toString('hex');
-  //         await getConnection()
-  //             .createQueryBuilder()
-  //             .update(User)
-  //             .set({ resetPasswordExpireTime: expDate, resetPasswordToken: token })
-  //             .where("email = :email", { email: reqData.email })
-  //             .execute();
-  //         return res.json({
-  //             token, expDate
-  //         });
-  //     });
-  // })
-  //
-  // static setNewresetPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  //     const reqData = <setNewResetPasswordInterface>req.body;
-  //     const validator = new SetNewResetPassowrd();
-  //     validator.email = reqData.email;
-  //     validator.newPassword = reqData.newPassword;
-  //     validator.token = reqData.token;
-  //     const errors = await validate(validator);
-  //     if (errors.length > 0) {
-  //         return next(new ErrorResponse('error in validate', 404));
-  //     }
-  //
-  //     const user = await User.findOneOrFail({ where: { email: reqData.email } });
-  //
-  //     const password = await bcrypt.hash(reqData.newPassword, 10);
-  //     await getConnection()
-  //         .createQueryBuilder()
-  //         .update(User)
-  //         .set({ resetPasswordExpireTime: null, resetPasswordToken: null, password: password })
-  //         .where("email = :email", { email: reqData.email })
-  //         .execute();
-  //     return res.json({
-  //         status: 'done'
-  //     });
-  // });
-  //
-  // static getMe = asyncHandler(async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
-  //     res.json(req.user)
-  // })
+
+  static orgResetPassword = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const reqData = <resetPasswordInterface>req.body;
+      const validator = new ResetPasswordValidate();
+      validator.email = reqData.email;
+      const errors = await validate(validator);
+      if (errors.length > 0) {
+        return next(new ErrorResponse("error in validate", 404));
+      }
+      const random = randomBytes(32, async (err: Error, buf: Buffer) => {
+        const to = await TouristOrganization.findOneOrFail({
+          where: { email: reqData.email }
+        });
+        const expDate = new Date(Date.now() + 3600000);
+        const token = buf.toString("hex");
+        await getConnection()
+          .createQueryBuilder()
+          .update(TouristOrganization)
+          .set({ resetPasswordExpireTime: expDate, resetPasswordToken: token })
+          .where("email = :email", { email: reqData.email })
+          .execute();
+        return res.json({
+          token,
+          expDate
+        });
+      });
+    }
+  );
+
+  static orgSetNewresetPassword = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const reqData = <setNewResetPasswordInterface>req.body;
+      const validator = new SetNewResetPassowrd();
+      validator.email = reqData.email;
+      validator.newPassword = reqData.newPassword;
+      validator.token = reqData.token;
+      const errors = await validate(validator);
+      if (errors.length > 0) {
+        return next(new ErrorResponse("error in validate", 404));
+      }
+
+      const to = await TouristOrganization.findOneOrFail({
+        where: { email: reqData.email }
+      });
+
+      const password = await bcrypt.hash(reqData.newPassword, 10);
+      await getConnection()
+        .createQueryBuilder()
+        .update(TouristOrganization)
+        .set({
+          resetPasswordExpireTime: null,
+          resetPasswordToken: null,
+          password: password
+        })
+        .where("email = :email", { email: reqData.email })
+        .execute();
+      return res.json({
+        status: "done"
+      });
+    }
+  );
+
+  static getMe = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      res.json(req.user);
+    }
+  );
 }
