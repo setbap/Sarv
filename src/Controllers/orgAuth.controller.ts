@@ -24,11 +24,6 @@ interface OrgInterface {
   password: string;
 }
 
-interface UserValidateInterface {
-  validateNumber: number;
-  email: string;
-}
-
 interface LoginInterface {
   password: string;
   email: string;
@@ -127,7 +122,7 @@ export class OrgAuthController {
 
       const token = jwt.sign(
         { id, email, roll: "ADMIN", name, description },
-        process.env.JWT_SECRET,
+        process.env.JWT_SECRET_ORG,
         {
           expiresIn: process.env.JWT_EXPIRE
         }
@@ -218,8 +213,8 @@ export class OrgAuthController {
   );
 
   static getMe = asyncHandler(
-    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
-      res.json(req.user);
+    async (req: any, res: Response, next: NextFunction) => {
+      res.json(req.org);
     }
   );
 }

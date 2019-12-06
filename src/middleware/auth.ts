@@ -7,10 +7,11 @@ import { User } from "../entity/User";
 
 interface ExtendedRequest extends Request {
   user?: any;
+  org?: any
 }
 
 // Protect routes
-export const protect = asyncHandler(
+export const userProtect = (userType?: string) => asyncHandler(
   async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     let token: string;
 
@@ -33,10 +34,20 @@ export const protect = asyncHandler(
     }
 
     try {
-      // Verify token
-      const decoded: any = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
-      // req.user = await User.findOneOrFail(decoded.id);
+
+      if (userType === "org") {
+        // Verify token
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET_ORG);
+        req.org = decoded;
+        // req.user = await User.findOneOrFail(decoded.id);
+
+      } else {
+        // Verify token
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET_USER);
+        req.user = decoded;
+        // req.user = await User.findOneOrFail(decoded.id);
+
+      }
 
       next();
     } catch (err) {
@@ -50,7 +61,7 @@ export const protect = asyncHandler(
 // Grant access to specific roles
 export const authorize = (...roles: any[]) => {
   return (req: ExtendedRequest, res: Response, next: NextFunction) => {
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.user.role) || !roles.includes(req.org.role)) {
       return next(
         new ErrorResponse(
           `User role ${req.user.role} is not authorized to access this route`,

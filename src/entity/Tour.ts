@@ -3,14 +3,14 @@ import {
 	BaseEntity,
 	PrimaryGeneratedColumn,
 	Column,
-	JoinColumn,
-	OneToOne,
+	// JoinColumn,
+	// OneToOne,
 	ManyToMany,
 	ManyToOne,
 	OneToMany,
 	JoinTable,
 } from "typeorm";
-import { Place } from "./Place";
+// import { Place } from "./Place";
 import { User } from "./User";
 import { TouristOrganization } from "./TouristOrganization";
 import { TourCommnet } from "./TourComment";
@@ -29,17 +29,35 @@ export class Tour extends BaseEntity {
 	@Column("int")
 	remainingCapacity: number;
 
-	@Column("int")
-	sourceId: number;
-	@OneToOne((type) => Place)
-	@JoinColumn()
-	source: Place;
+	// @Column("int")
+	// sourceId: number;
+	// @OneToOne((type) => Place)
+	// @JoinColumn()
+	// source: Place;
+	@Column({
+		type: 'geometry',
+		nullable: false,
+		spatialFeatureType: 'Point',
+		srid: 4326
+	})
+	sourceGeo: object;
+	@Column('varchar')
+	sourcePlace: string;
 
-	@Column("int")
-	destinationId: number;
-	@OneToOne((type) => Place)
-	@JoinColumn()
-	destination: Place;
+	// @Column("int")
+	// destinationId: number;
+	// @OneToOne((type) => Place)
+	// @JoinColumn()
+	// destination: Place;
+	@Column({
+		type: 'geometry',
+		nullable: false,
+		spatialFeatureType: 'Point',
+		srid: 4326
+	})
+	destinationGeo: object;
+	@Column('varchar')
+	destinationPlace: string;
 
 	@Column("timestamptz")
 	startDate: Date;

@@ -106,7 +106,7 @@ export class UserAuthController {
       });
       if (
         not_reg_user.createdAt.getTime() + +(1000 * 60 * 60 * 24) >
-          Date.now() &&
+        Date.now() &&
         not_reg_user.validationNumber === reqData.validateNumber
       ) {
         user.name = not_reg_user.name;
@@ -120,7 +120,6 @@ export class UserAuthController {
         await NotRegUser.delete({ email: reqData.email });
         return res.json({
           status: "user created",
-          number: user
         });
       } else {
         return res.json({
@@ -154,7 +153,7 @@ export class UserAuthController {
 
       const token = jwt.sign(
         { id, email, gender, roll, dob, name, lastname },
-        process.env.JWT_SECRET,
+        process.env.JWT_SECRET_USER,
         {
           expiresIn: process.env.JWT_EXPIRE
         }
