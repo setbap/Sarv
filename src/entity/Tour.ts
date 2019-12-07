@@ -14,6 +14,7 @@ import {
 import { User } from "./User";
 import { TouristOrganization } from "./TouristOrganization";
 import { TourCommnet } from "./TourComment";
+import { IsInt, IsString, Length, IsObject, IsDate, IsNumber, Min, Max } from "class-validator";
 
 @Entity()
 export class Tour extends BaseEntity {
@@ -21,12 +22,17 @@ export class Tour extends BaseEntity {
 	id: number;
 
 	@Column()
+	@IsString()
+	@Length(4, 64)
 	name: string;
 
+
 	@Column("int")
+	@IsInt()
 	tourCapacity: number;
 
 	@Column("int")
+	@IsInt()
 	remainingCapacity: number;
 
 	// @Column("int")
@@ -40,8 +46,11 @@ export class Tour extends BaseEntity {
 		spatialFeatureType: 'Point',
 		srid: 4326
 	})
+	@IsObject()
 	sourceGeo: object;
 	@Column('varchar')
+	@IsString()
+	@Length(2, 64)
 	sourcePlace: string;
 
 	// @Column("int")
@@ -55,23 +64,34 @@ export class Tour extends BaseEntity {
 		spatialFeatureType: 'Point',
 		srid: 4326
 	})
+	@IsObject()
 	destinationGeo: object;
 	@Column('varchar')
+	@IsString()
+	@Length(2, 64)
 	destinationPlace: string;
 
 	@Column("timestamptz")
+	@IsDate()
 	startDate: Date;
 
 	@Column("timestamptz")
+	@IsDate()
 	finishDate: Date;
 
 	@Column("double precision")
+	@IsNumber()
+	@Min(1)
+	@Max(5)
 	hardShipLevel: number;
 
 	@Column("int")
+	@IsInt()
 	price: number;
 
 	@Column("varchar", { length: 255 })
+	@IsString()
+	@Length(4, 128)
 	description: string;
 
 	@ManyToMany(
@@ -86,6 +106,18 @@ export class Tour extends BaseEntity {
 		(tg) => tg.tours,
 	)
 	organiaztion: TouristOrganization;
+	@Column('int')
+	@IsInt()
+	organiaztionId: number
+
+	@ManyToOne(
+		(type) => User,
+		(tg) => tg.tours,
+	)
+	tourleader: User;
+	@Column('int')
+	@IsInt()
+	tourleaderId: number
 
 	@OneToMany(
 		(type) => TourCommnet,
