@@ -5,7 +5,11 @@
 -   [x] create user
 -   [x] login
 -   [x] protected route
--   [] create organization
--   [] log in as organiaztion
--   [] change org pass
--   [] create tour
+-   [x] create organization
+-   [x] log in as organiaztion
+-   [] edit user info
+-   [] edit organiaztion info
+-   [x] change org pass
+-   [x] create tour
+-   [] search in tour
+-   [] Join the Tour
