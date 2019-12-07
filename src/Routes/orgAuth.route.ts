@@ -15,5 +15,6 @@ router.post(
   OrgAuthController.orgSetNewresetPassword
 );
 router.post("/get_me", userProtect("org"), OrgAuthController.getMe);
+router.post("/add_tour_leader", userProtect("org"), OrgAuthController.addTourLeader);
 
 export default router;

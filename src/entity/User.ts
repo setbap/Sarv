@@ -51,6 +51,9 @@ export class User extends BaseEntity {
 	@Length(2, 32)
 	lastname: string;
 
+	@Column('boolean', { default: false })
+	iWantToBeTourLeader: boolean
+
 	//email fard
 	@Column()
 	@IsEmail()
@@ -96,18 +99,21 @@ export class User extends BaseEntity {
 	@IsOptional()
 	roll: UserRoll;
 
-	@Column('timestamp without time zone',{nullable:true})
+	@Column('timestamp without time zone', { nullable: true })
 	@IsDate()
 	@IsOptional()
-	resetPasswordExpireTime : Date;
+	resetPasswordExpireTime: Date;
 
-	@Column({nullable:true})
+	@Column({ nullable: true })
 	@IsInt()
 	@IsOptional()
-	resetPasswordToken : string;
+	resetPasswordToken: string;
 
 
 	// age fardi tour lider bashe bayad id sazmani ke tour leader hast sabt beshe
+	@Column('int', { nullable: true })
+	organizationId: number
+
 	@ManyToOne(
 		(type) => TouristOrganization,
 		(tg) => tg.leaders,

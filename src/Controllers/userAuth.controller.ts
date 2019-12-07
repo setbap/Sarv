@@ -249,4 +249,21 @@ export class UserAuthController {
       res.json(req.user);
     }
   );
+
+  static iWantToBeTourLeader = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      const user = await User.findOneOrFail(req.user.id)
+      if (user.iWantToBeTourLeader) {
+        return res.json({
+          "status": "you are tour leader"
+        })
+      }
+      user.iWantToBeTourLeader = true;
+      await user.save()
+
+      return res.json({
+        "status": "no you can invite as tour leader"
+      })
+    }
+  );
 }

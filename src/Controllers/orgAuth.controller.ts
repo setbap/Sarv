@@ -44,6 +44,10 @@ interface setNewResetPasswordInterface {
   newPassword: string;
 }
 
+interface addTourLeaderInterface {
+  email: string;
+}
+
 export class OrgAuthController {
   static orgCreate = asyncHandler(
     async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
@@ -215,6 +219,32 @@ export class OrgAuthController {
   static getMe = asyncHandler(
     async (req: any, res: Response, next: NextFunction) => {
       res.json(req.org);
+    }
+  );
+
+  static addTourLeader = asyncHandler(
+    async (req: any, res: Response, next: NextFunction) => {
+      const reqData = <addTourLeaderInterface>req.body
+      const user = await User.findOneOrFail({ where: { email: reqData.email } })
+      const org = await TouristOrganization.findOneOrFail(req.org.id)
+
+      if (user.iWantToBeTourLeader && user.organizationId === null) {
+
+
+        user.organization = org
+        await user.save();
+        return res.json({
+          status: "tour leader added"
+        })
+      } else if (user.organizationId === org.id) {
+        return res.json({
+          status: "you added this user before"
+        })
+      } else {
+        return res.json({
+          status: "you can't add this user as tour leader"
+        })
+      }
     }
   );
 }
