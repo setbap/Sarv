@@ -3,21 +3,23 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  BaseEntity
+  BaseEntity,
+  Unique
 } from "typeorm";
 import { User } from "./User";
 import { TouristOrganization } from "./TouristOrganization";
+import { Max, Min } from "class-validator";
 
 @Entity()
-export class OrganizationComment extends BaseEntity {
+@Unique(["userId", "organizationId"])
+export class OrganizationRate extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  body: string;
-
-  @Column("character")
-  nameOfUser: string;
+  @Column("int")
+  @Max(5)
+  @Min(1)
+  rate: number;
 
   @Column("int")
   userId: number;
@@ -28,11 +30,12 @@ export class OrganizationComment extends BaseEntity {
   )
   user: User;
 
+  @Column("int")
+  organizationId: number;
+
   @ManyToOne(
     type => TouristOrganization,
     og => og.comments
   )
   organization: TouristOrganization;
-  @Column("int")
-  organizationId: number;
 }

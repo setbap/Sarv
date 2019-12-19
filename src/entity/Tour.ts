@@ -24,6 +24,7 @@ import {
   Min,
   Max
 } from "class-validator";
+import { TourRate } from "./TourRate";
 
 @Entity()
 export class Tour extends BaseEntity {
@@ -132,4 +133,19 @@ export class Tour extends BaseEntity {
     cmt => cmt => cmt.tour
   )
   comments: TourCommnet[];
+
+  @OneToMany(
+    type => TourRate,
+    cmt => cmt => cmt.tour
+  )
+  rates: TourRate[];
+
+  @Column("int", { default: 0 })
+  commnetCount: number;
+
+  @Column("int", { default: 0 })
+  rateCount: number;
+
+  @Column("int", { default: 0 })
+  rateAvg: number;
 }
