@@ -11,6 +11,9 @@
 - [] edit organiaztion info
 - [x] change org pass
 - [x] create tour
-- [] show tours
-- [] search in tour
+- [x] show lastest tours
+- [x] search in tour
+- [] comment in tour
+- [] comment in organization
+- [] show single tour with commnet
 - [] Join the Tour
