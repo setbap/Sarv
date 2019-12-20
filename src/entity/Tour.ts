@@ -130,13 +130,13 @@ export class Tour extends BaseEntity {
 
   @OneToMany(
     type => TourCommnet,
-    cmt => cmt => cmt.tour
+    cmt => cmt.tour
   )
   comments: TourCommnet[];
 
   @OneToMany(
     type => TourRate,
-    cmt => cmt => cmt.tour
+    cmt => cmt.tour
   )
   rates: TourRate[];
 
@@ -146,6 +146,6 @@ export class Tour extends BaseEntity {
   @Column("int", { default: 0 })
   rateCount: number;
 
-  @Column("int", { default: 0 })
+  @Column("double precision", { default: 0 })
   rateAvg: number;
 }

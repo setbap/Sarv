@@ -32,9 +32,9 @@ export class TourRate extends BaseEntity {
 
   @ManyToOne(
     type => Tour,
-    tour => tour.comments
+    tour => tour.rates
   )
-  tour: TouristOrganization;
+  tour: Tour;
 
   @Column("int")
   tourId: number;

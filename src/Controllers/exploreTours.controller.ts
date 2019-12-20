@@ -9,12 +9,26 @@ import {
   MoreThanOrEqual,
   Brackets,
   LessThanOrEqual,
-  Equal
+  Equal,
+  getConnection
 } from "typeorm";
+import { RequestWithDecodedUser } from "./userAuth.controller";
+import { TourRate } from "../entity/TourRate";
+import { TourCommnet } from "../entity/TourComment";
 
 interface lastTourInterface {
   isTwelve: boolean;
   pageNumber: number;
+}
+
+interface rateTourInterface {
+  tourId: number;
+  rate: number;
+}
+
+interface commentTourInterface {
+  tourId: number;
+  body: string;
 }
 
 interface fullSearchInterface extends lastTourInterface {
@@ -215,6 +229,98 @@ export class ExploreToursController {
         allItems: count,
         pageNumber: pageNumber,
         tours
+      });
+    }
+  );
+
+  static rateTour = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      const reqData = <rateTourInterface>req.body;
+
+      const tourRate = new TourRate();
+      tourRate.rate = reqData.rate;
+      tourRate.tourId = reqData.tourId;
+      tourRate.userId = req.user.id;
+
+      const tour = await Tour.findOneOrFail(reqData.tourId);
+      const rateAvg =
+        (tour.rateAvg * tour.rateCount + reqData.rate) / (tour.rateCount + 1);
+      const rateCount = tour.rateCount + 1;
+
+      await getConnection()
+        .createQueryBuilder()
+        .update(Tour)
+        .set({ rateAvg: rateAvg, rateCount: rateCount })
+        .where("id = :id", { id: reqData.tourId })
+        .execute();
+      await tourRate.save();
+
+      res.json({
+        status: "added"
+      });
+    }
+  );
+
+  static commentTour = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      const reqData = <commentTourInterface>req.body;
+
+      const tourComment = new TourCommnet();
+      tourComment.body = reqData.body;
+      tourComment.tourId = reqData.tourId;
+      tourComment.userId = req.user.id;
+      tourComment.nameOfUser = req.user.name;
+
+      await getConnection()
+        .createQueryBuilder()
+        .update(Tour)
+        .set({ commnetCount: () => '"commnetCount" + 1' })
+        .where("id = :id", { id: reqData.tourId })
+        .execute();
+      await tourComment.save();
+
+      res.json({
+        status: "added"
+      });
+    }
+  );
+
+  static singleTour = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      // const tour = await Tour.findOne(req.params.id, {
+      //   relations: ["comments", "tourleader", "organiaztion"],
+      //   select: ["id"]
+      // });
+
+      const tour = await getRepository(Tour)
+        .createQueryBuilder("tour")
+        .leftJoinAndSelect("tour.comments", "cmts")
+        .leftJoinAndSelect("tour.organiaztion", "org")
+        .leftJoinAndSelect("tour.tourleader", "tl")
+        .select([
+          "cmts",
+          "tour",
+          "tour.id",
+          "org.email",
+          "org.id",
+          "org.name",
+          "org.avgRate",
+          "tl.id",
+          "tl.name",
+          "tl.lastname"
+        ])
+        .where({ id: req.params.id })
+        .getOne();
+
+      if (!tour) {
+        return res.status(404).json({
+          status: "not found"
+        });
+      }
+
+      res.json({
+        status: "done",
+        tour
       });
     }
   );

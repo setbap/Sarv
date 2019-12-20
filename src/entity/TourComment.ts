@@ -3,7 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  BaseEntity
+  BaseEntity,
+  JoinColumn
 } from "typeorm";
 import { User } from "./User";
 import { TouristOrganization } from "./TouristOrganization";
@@ -17,18 +18,24 @@ export class TourCommnet extends BaseEntity {
   @Column()
   body: string;
 
-  @Column("character")
+  @Column("character varying")
   nameOfUser: string;
 
   @ManyToOne(
     type => User,
-    user => user.tourCommnets
+    user => user.id
   )
+  @JoinColumn()
   user: User;
+  @Column("int")
+  userId: number;
 
   @ManyToOne(
     type => Tour,
-    tour => tour.comments
+    tour => tour.id
   )
-  tour: TouristOrganization;
+  @JoinColumn({ name: "tourId" })
+  tour: Tour;
+  @Column("int")
+  tourId: number;
 }
