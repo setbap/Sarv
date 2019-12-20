@@ -13,7 +13,11 @@
 - [x] create tour
 - [x] show lastest tours
 - [x] search in tour
-- [] comment in tour
-- [] comment in organization
-- [] show single tour with commnet
+- [x] comment in tour
+- [x] comment in organization
+- [x] show single tour with commnet
+- [] show org accourding rate
+- [] comment in org
+- [] rate in org
+- [] show single org
 - [] Join the Tour
