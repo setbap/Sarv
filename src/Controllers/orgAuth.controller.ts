@@ -11,7 +11,8 @@ import { validateUserNumber } from "../validation/auth/UserValidate";
 import { LoginValidate } from "../validation/auth/LoginValidate";
 import { ResetPasswordValidate } from "../validation/auth/resetPasswordValidate";
 import { randomBytes } from "crypto";
-import * as buffer from "buffer";
+import * as path from "path";
+
 import { SetNewResetPassowrd } from "../validation/auth/SetNewResetPassowrd";
 import { RequestWithDecodedUser } from "./userAuth.controller";
 import { TouristOrganization } from "../entity/TouristOrganization";
@@ -52,16 +53,46 @@ export class OrgAuthController {
   static orgCreate = asyncHandler(
     async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
       const reqData = <OrgInterface>req.body;
+      let imageUrl = null;
+
+      if (req.files && req.files.image) {
+        const file: any = req.files.image;
+        if (!file.mimetype.startsWith("image")) {
+          return next(new ErrorResponse(`Please upload an image file`, 400));
+        }
+
+        // Check filesize
+        if (file.size > process.env.MAX_FILE_UPLOAD) {
+          return next(
+            new ErrorResponse(
+              `Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`,
+              400
+            )
+          );
+        }
+        file.name = `photo_${new Date().getTime()}_user${req.user.id}_${
+          path.parse(file.name).ext
+        }`;
+        imageUrl = `${process.env.IMAGE_URL}/${file.name}`;
+        file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
+          if (err) {
+            console.error(err);
+            return next(new ErrorResponse(`Problem with file upload`, 500));
+          }
+        });
+      }
       const org = new NotAcceptedTouristOrganization();
       org.name = reqData.name;
       org.description = reqData.description;
       org.email = req.user.email;
       org.password = reqData.password;
       org.orgCreatorId = req.user.id;
-      org.phoneNumber = reqData.phoneNumber;
+      org.phoneNumber = +reqData.phoneNumber;
+      if (imageUrl) {
+        org.image = imageUrl;
+      }
       const errors = await validate(org);
       if (errors.length > 0) {
-        console.log("my log", errors);
         return next(new ErrorResponse("error in validate", 404));
       } else {
         org.password = await bcrypt.hash(reqData.password, 10);
@@ -87,6 +118,7 @@ export class OrgAuthController {
         to.phoneNumber = notAccpeted.phoneNumber;
         to.password = notAccpeted.password;
         to.orgCreatorId = notAccpeted.orgCreatorId;
+        to.image = notAccpeted.image;
         await to.save();
         await NotAcceptedTouristOrganization.delete(reqData.orgId);
         return res.json({
@@ -224,26 +256,26 @@ export class OrgAuthController {
 
   static addTourLeader = asyncHandler(
     async (req: any, res: Response, next: NextFunction) => {
-      const reqData = <addTourLeaderInterface>req.body
-      const user = await User.findOneOrFail({ where: { email: reqData.email } })
-      const org = await TouristOrganization.findOneOrFail(req.org.id)
+      const reqData = <addTourLeaderInterface>req.body;
+      const user = await User.findOneOrFail({
+        where: { email: reqData.email }
+      });
+      const org = await TouristOrganization.findOneOrFail(req.org.id);
 
       if (user.iWantToBeTourLeader && user.organizationId === null) {
-
-
-        user.organization = org
+        user.organization = org;
         await user.save();
         return res.json({
           status: "tour leader added"
-        })
+        });
       } else if (user.organizationId === org.id) {
         return res.json({
           status: "you added this user before"
-        })
+        });
       } else {
         return res.json({
           status: "you can't add this user as tour leader"
-        })
+        });
       }
     }
   );

@@ -134,6 +134,11 @@ export class Tour extends BaseEntity {
   )
   comments: TourCommnet[];
 
+  @Column("character varying", {
+    default: "http://localhost:5000/public/upload/a.jpg"
+  })
+  image: string;
+
   @OneToMany(
     type => TourRate,
     cmt => cmt.tour

@@ -43,6 +43,11 @@ export class TouristOrganization extends BaseEntity {
   @Length(6)
   password: string;
 
+  @Column("character varying", {
+    default: "http://localhost:5000/public/upload/to.jpg"
+  })
+  image: string;
+
   @Column()
   orgCreatorId: number;
 
@@ -73,10 +78,16 @@ export class TouristOrganization extends BaseEntity {
   leaders: User[];
 
   @Column("int", { default: 0 })
-  numberOfCommnet: number;
+  commnetCount: number;
+
+  @Column("int", { default: 0 })
+  rateCount: number;
+
+  @Column("int", { default: 0 })
+  tourCount: number;
 
   @Column("double precision", { default: 0 })
-  avgRate: number;
+  rateAvg: number;
 
   @OneToMany(
     type => OrganizationComment,

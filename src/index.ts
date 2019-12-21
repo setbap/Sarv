@@ -26,8 +26,10 @@ createConnection()
     app.use(cors());
     app.use(helmet());
     app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use("/public", express.static(join(__dirname, "..", "public")));
     app.use(cookieParser());
-    app.use(fileupload());
+    // app.use(fileupload());
 
     app.use("/", routes);
 

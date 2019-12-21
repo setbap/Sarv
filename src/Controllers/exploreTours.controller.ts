@@ -74,6 +74,7 @@ export class ExploreToursController {
           "tour.finishDate",
           "tour.price",
           "tour.hardShipLevel",
+          "tour.image",
           "organiaztion.name",
           "organiaztion.id"
           // "tour.description",
@@ -117,6 +118,7 @@ export class ExploreToursController {
           "tour.startDate",
           "tour.finishDate",
           "tour.price",
+          "tour.image",
           "tour.hardShipLevel",
           "organiaztion.name",
           "organiaztion.id",
@@ -207,6 +209,7 @@ export class ExploreToursController {
         .select([
           "tour.id",
           "tour.name",
+          "tour.image",
           "tour.price",
           "tour.remainingCapacity",
           "tour.sourcePlace",
@@ -271,13 +274,13 @@ export class ExploreToursController {
       tourComment.userId = req.user.id;
       tourComment.nameOfUser = req.user.name;
 
+      await tourComment.save();
       await getConnection()
         .createQueryBuilder()
         .update(Tour)
         .set({ commnetCount: () => '"commnetCount" + 1' })
         .where("id = :id", { id: reqData.tourId })
         .execute();
-      await tourComment.save();
 
       res.json({
         status: "added"
@@ -304,8 +307,10 @@ export class ExploreToursController {
           "org.email",
           "org.id",
           "org.name",
-          "org.avgRate",
+          "org.rateAvg",
+          "org.image",
           "tl.id",
+          "tl.image",
           "tl.name",
           "tl.lastname"
         ])

@@ -33,6 +33,11 @@ export class NotAcceptedTouristOrganization extends BaseEntity {
   @Length(8, 255)
   description: string;
 
+  @Column("character varying", {
+    default: "http://localhost:5000/public/upload/to.jpg"
+  })
+  image: string;
+
   @Column("int", { nullable: true })
   @IsInt()
   phoneNumber: number;

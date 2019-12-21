@@ -1,20 +1,20 @@
 import {
-	Entity,
-	PrimaryGeneratedColumn,
-	Column,
-	Unique,
-	CreateDateColumn,
-	UpdateDateColumn,
-	BaseEntity,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Unique,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BaseEntity
 } from "typeorm";
 
 import {
-	Length,
-	IsEmail,
-	MinLength,
-	IsOptional,
-	IsDate,
-	IsEnum,
+  Length,
+  IsEmail,
+  MinLength,
+  IsOptional,
+  IsDate,
+  IsEnum
 } from "class-validator";
 import { IsEmailAlreadyExist } from "../validation/isEmailAlreadyExist";
 import { UserGender } from "./User";
@@ -23,77 +23,82 @@ import { isEmailAlreadyExistNotRegUser } from "../validation/isEmailAlreadyExist
 @Entity()
 @Unique(["email"])
 export class NotRegUser extends BaseEntity {
-	@PrimaryGeneratedColumn()
-	id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-	// name fard morderd nazar
-	@Column()
-	@Length(2, 24)
-	name: string;
+  // name fard morderd nazar
+  @Column()
+  @Length(2, 24)
+  name: string;
 
-	// name khanevadegi
-	@Column()
-	@Length(2, 32)
-	lastname: string;
+  // name khanevadegi
+  @Column()
+  @Length(2, 32)
+  lastname: string;
 
-	//email fard
-	@Column()
-	@IsEmail()
-	@isEmailAlreadyExistNotRegUser({ message: "email already in use" })
-	@IsEmailAlreadyExist({ message: "email already in use" })
-	email: string;
+  //email fard
+  @Column()
+  @IsEmail()
+  @isEmailAlreadyExistNotRegUser({ message: "email already in use" })
+  @IsEmailAlreadyExist({ message: "email already in use" })
+  email: string;
 
-	//ramze fard
-	@Column()
-	@MinLength(8)
-	password: string;
-	// @BeforeInsert()
-	// async hashPasswordBeforeInsert() {
-	// 	this.password = await bcrypt.hash(this.password, 10);
-	// }
+  //ramze fard
+  @Column()
+  @MinLength(8)
+  password: string;
+  // @BeforeInsert()
+  // async hashPasswordBeforeInsert() {
+  // 	this.password = await bcrypt.hash(this.password, 10);
+  // }
 
-	// shomare telephone user
-	@Column("int", { nullable: true })
-	@IsOptional()
-	@Length(9, 9)
-	phoneNumber: number;
+  // shomare telephone user
+  @Column("int", { nullable: true })
+  @IsOptional()
+  @Length(9, 9)
+  phoneNumber: number;
 
-	// tarikhe tavalod user baraye peida kardane sen
-	//date of breath
-	@Column({ type: "date" })
-	@IsDate()
-	dob: Date;
+  @Column("character varying", {
+    default: "http://localhost:5000/public/upload/to.jpg"
+  })
+  image: string;
 
-	// peida kardane jensiate fard baraye sabte nam dar tour ha
-	@Column({
-		type: "enum",
-		enum: UserGender,
-		default: UserGender.WOMAN,
-	})
-	@IsEnum(UserGender)
-	gender: UserGender;
+  // tarikhe tavalod user baraye peida kardane sen
+  //date of breath
+  @Column({ type: "date" })
+  @IsDate()
+  dob: Date;
 
-	@Column("int")
-	validationNumber: number;
+  // peida kardane jensiate fard baraye sabte nam dar tour ha
+  @Column({
+    type: "enum",
+    enum: UserGender,
+    default: UserGender.WOMAN
+  })
+  @IsEnum(UserGender)
+  gender: UserGender;
 
-	//  tarikhe ozviate fard dar site ra negahdari mikonad
-	@Column()
-	@CreateDateColumn()
-	createdAt: Date;
+  @Column("int")
+  validationNumber: number;
 
-	// tarikhi ke akhrin bar fard profiel khoresh ro update mikone
-	@Column()
-	@UpdateDateColumn()
-	updatedAt: Date;
+  //  tarikhe ozviate fard dar site ra negahdari mikonad
+  @Column()
+  @CreateDateColumn()
+  createdAt: Date;
 
-	// @BeforeInsert()
-	// async hashPasswordBeforeInsert() {
-	// 	console.log("sinaaaaaaaaa");
+  // tarikhi ke akhrin bar fard profiel khoresh ro update mikone
+  @Column()
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-	// 	this.password = await bcrypt.hash(this.password, 10);
-	// }
+  // @BeforeInsert()
+  // async hashPasswordBeforeInsert() {
+  // 	console.log("sinaaaaaaaaa");
 
-	// checkIfUnencryptedPasswordIsValid(unencryptedPassword: string) {
-	// 	return bcrypt.compareSync(unencryptedPassword, this.password);
-	// }
+  // 	this.password = await bcrypt.hash(this.password, 10);
+  // }
+
+  // checkIfUnencryptedPasswordIsValid(unencryptedPassword: string) {
+  // 	return bcrypt.compareSync(unencryptedPassword, this.password);
+  // }
 }
