@@ -18,6 +18,7 @@ import { TourCommnet } from "../entity/TourComment";
 import { TouristOrganization } from "../entity/TouristOrganization";
 import { ErrorResponse } from "../utils/errorResponse";
 import { OrganizationRate } from "../entity/OrganizationRate";
+import { OrganizationComment } from "../entity/OrganizationComment";
 
 interface bestOrgInterface {
   isTwelve: boolean;
@@ -261,67 +262,71 @@ export class ExploreOrgsController {
     }
   );
 
-  //   static commentTour = asyncHandler(
-  //     async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
-  //       const reqData = <commentTourInterface>req.body;
+  static commentOrg = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      const reqData = <commentOrgInterface>req.body;
 
-  //       const tourComment = new TourCommnet();
-  //       tourComment.body = reqData.body;
-  //       tourComment.tourId = reqData.tourId;
-  //       tourComment.userId = req.user.id;
-  //       tourComment.nameOfUser = req.user.name;
+      const orgComment = new OrganizationComment();
+      orgComment.body = reqData.body;
+      orgComment.organizationId = reqData.orgId;
+      orgComment.userId = req.user.id;
+      orgComment.nameOfUser = req.user.name;
 
-  //       await getConnection()
-  //         .createQueryBuilder()
-  //         .update(Tour)
-  //         .set({ commnetCount: () => '"commnetCount" + 1' })
-  //         .where("id = :id", { id: reqData.tourId })
-  //         .execute();
-  //       await tourComment.save();
+      await orgComment.save();
+      await getConnection()
+        .createQueryBuilder()
+        .update(Tour)
+        .set({ commnetCount: () => '"commnetCount" + 1' })
+        .where("id = :id", { id: reqData.orgId })
+        .execute();
 
-  //       res.json({
-  //         status: "added"
-  //       });
-  //     }
-  //   );
+      res.json({
+        status: "comment added"
+      });
+    }
+  );
 
-  //   static singleTour = asyncHandler(
-  //     async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
-  //       // const tour = await Tour.findOne(req.params.id, {
-  //       //   relations: ["comments", "tourleader", "organiaztion"],
-  //       //   select: ["id"]
-  //       // });
+  static singleOrg = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      // const tour = await Tour.findOne(req.params.id, {
+      //   relations: ["comments", "tourleader", "organiaztion"],
+      //   select: ["id"]
+      // });
 
-  //       const tour = await getRepository(Tour)
-  //         .createQueryBuilder("tour")
-  //         .leftJoinAndSelect("tour.comments", "cmts")
-  //         .leftJoinAndSelect("tour.organiaztion", "org")
-  //         .leftJoinAndSelect("tour.tourleader", "tl")
-  //         .select([
-  //           "cmts",
-  //           "tour",
-  //           "tour.id",
-  //           "org.email",
-  //           "org.id",
-  //           "org.name",
-  //           "org.rateAvg",
-  //           "tl.id",
-  //           "tl.name",
-  //           "tl.lastname"
-  //         ])
-  //         .where({ id: req.params.id })
-  //         .getOne();
+      const org = await getRepository(TouristOrganization)
+        .createQueryBuilder("to")
+        .leftJoinAndSelect("to.comments", "cmts")
+        .leftJoinAndSelect("to.tours", "tour")
+        .leftJoinAndSelect("to.leaders", "tl")
+        .leftJoinAndSelect("to.orgCreator", "oc")
+        .select([
+          "to",
+          "cmts",
+          "tour.id",
+          "tour.name",
+          "tour.startDate",
+          "tour.finishDate",
+          "tl.id",
+          "tl.name",
+          "tl.lastname",
+          "oc.id",
+          "oc.name",
+          "oc.lastname"
+        ])
+        .where({ id: req.params.id })
+        .getOne();
 
-  //       if (!tour) {
-  //         return res.status(404).json({
-  //           status: "not found"
-  //         });
-  //       }
+      if (!org) {
+        return res.status(404).json({
+          status: "not found"
+        });
+      }
+      delete org.password;
 
-  //       res.json({
-  //         status: "done",
-  //         tour
-  //       });
-  //     }
-  //   );
+      res.json({
+        status: "done",
+        org
+      });
+    }
+  );
 }

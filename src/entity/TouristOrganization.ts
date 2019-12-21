@@ -16,6 +16,7 @@ import * as bcrypt from "bcryptjs";
 import { Tour } from "./Tour";
 import { OrganizationComment } from "./OrganizationComment";
 import { IsString, Length, IsInt, IsDate, IsOptional } from "class-validator";
+import { OrganizationRate } from "./OrganizationRate";
 
 @Entity()
 export class TouristOrganization extends BaseEntity {
@@ -91,9 +92,15 @@ export class TouristOrganization extends BaseEntity {
 
   @OneToMany(
     type => OrganizationComment,
-    cmt => cmt => cmt.organiaztion
+    cmt => cmt.organization
   )
   comments: OrganizationComment[];
+
+  @OneToMany(
+    type => OrganizationRate,
+    cmt => cmt.organization
+  )
+  rates: OrganizationRate[];
 
   //  tarikhe ozviate fard dar site ra negahdari mikonad
   @Column()

@@ -16,7 +16,7 @@ export class OrganizationComment extends BaseEntity {
   @Column()
   body: string;
 
-  @Column("character")
+  @Column("character varying")
   nameOfUser: string;
 
   @Column("int")

@@ -11,12 +11,12 @@ router.post("/rate_org", userProtect("user"), ExploreOrgsController.rateOrg);
 // router.post("/distant_search", ExploreToursController.distantSearch);
 // router.post("/full_search", ExploreToursController.fullSearch);
 // router.post("/rate_tour", userProtect("user"), ExploreToursController.rateTour);
-// router.post(
-//   "/comment_tour",
-//   userProtect("user"),
-//   ExploreToursController.commentTour
-// );
+router.post(
+  "/comment_org",
+  userProtect("user"),
+  ExploreOrgsController.commentOrg
+);
 
-// router.post("/tours/:id", ExploreToursController.singleTour);
+router.post("/orgs/:id", ExploreOrgsController.singleOrg);
 
 export default router;
