@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcryptjs";
-import { getConnection, getRepository } from "typeorm";
+import { getConnection, } from "typeorm";
 import { User, UserGender } from "../entity/User";
 import { NotRegUser } from "../entity/NotRegUser";
 import { asyncHandler } from "../middleware/async";
@@ -12,6 +12,8 @@ import { LoginValidate } from "../validation/auth/LoginValidate";
 import { ResetPasswordValidate } from "../validation/auth/resetPasswordValidate";
 import { randomBytes } from "crypto";
 import { SetNewResetPassowrd } from "../validation/auth/SetNewResetPassowrd";
+import * as path from "path";
+
 
 interface DecodedUserInterface {
   id: number;
@@ -57,6 +59,17 @@ interface setNewResetPasswordInterface {
   email: string;
   token: string;
   newPassword: string;
+}
+
+interface updateInfoInterface {
+  name?: string;
+  lastname?: string;
+  dob?: Date;
+}
+
+interface authedChangePassInterface {
+  newPassword: string;
+  oldPassword: string;
 }
 
 export class UserAuthController {
@@ -263,6 +276,83 @@ export class UserAuthController {
 
       return res.json({
         "status": "no you can invite as tour leader"
+      })
+    }
+  );
+
+  static updateInfoInter = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      const user = await User.findOneOrFail(req.user.id)
+      const newInfo = <updateInfoInterface>req.body;
+      user.name = newInfo.name ? newInfo.name : user.name;
+      user.lastname = newInfo.lastname ? newInfo.lastname : user.lastname;
+      user.dob = newInfo.dob ? newInfo.dob : user.dob;
+      await user.save()
+      return res.json({
+        "status": "your info updated"
+      })
+    }
+  );
+
+
+  static authedChangePassword = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      const user = await User.findOneOrFail(req.user.id)
+      const reqData = <authedChangePassInterface>req.body;
+      const password = await bcrypt.hash(reqData.newPassword, 10);
+      if (user.password === password) {
+        const newPassword = await bcrypt.hash(reqData.newPassword, 10);
+        user.password === newPassword;
+      } else {
+        return next(new ErrorResponse("wrong old password", 404));
+      }
+
+
+      await user.save()
+      return res.json({
+        "status": "your password updated"
+      })
+    }
+  );
+
+  static updateProfilePic = asyncHandler(
+    async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
+      const user = await User.findOneOrFail(req.user.id)
+      let imageUrl = null;
+
+      if (req.files && req.files.image) {
+        const file: any = req.files.image;
+        if (!file.mimetype.startsWith("image")) {
+          return next(new ErrorResponse(`Please upload an image file`, 400));
+        }
+
+        // Check filesize
+        if (file.size > process.env.MAX_FILE_UPLOAD) {
+          return next(
+            new ErrorResponse(
+              `Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`,
+              400
+            )
+          );
+        }
+        file.name = `photo_${new Date().getTime()}_org${req.user.id}_${
+          path.parse(file.name).ext
+          }`;
+        imageUrl = `${process.env.IMAGE_URL}/${file.name}`;
+        file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
+          if (err) {
+            console.error(err);
+            return next(new ErrorResponse(`Problem with file upload`, 500));
+          }
+        });
+      }
+
+      user.image = imageUrl ? imageUrl : user.image
+
+
+      await user.save()
+      return res.json({
+        "status": "your password updated"
       })
     }
   );

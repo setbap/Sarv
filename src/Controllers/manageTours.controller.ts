@@ -1,21 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import * as jwt from "jsonwebtoken";
-import * as bcrypt from "bcryptjs";
-import { getConnection, getRepository } from "typeorm";
-import { User, UserGender } from "../entity/User";
-import { NotRegUser } from "../entity/NotRegUser";
+import { getConnection } from "typeorm";
+import { User } from "../entity/User";
 import { asyncHandler } from "../middleware/async";
 import { ErrorResponse } from "../utils/errorResponse";
 import { validate } from "class-validator";
-import { validateUserNumber } from "../validation/auth/UserValidate";
-import { LoginValidate } from "../validation/auth/LoginValidate";
-import { ResetPasswordValidate } from "../validation/auth/resetPasswordValidate";
-import { randomBytes } from "crypto";
-import * as buffer from "buffer";
-import { SetNewResetPassowrd } from "../validation/auth/SetNewResetPassowrd";
-import { RequestWithDecodedUser } from "./userAuth.controller";
 import { TouristOrganization } from "../entity/TouristOrganization";
-import { NotAcceptedTouristOrganization } from "../entity/NotAcceptedTouristOrganization";
 import { Tour } from "../entity/Tour";
 import * as path from "path";
 
@@ -68,7 +57,7 @@ export class ManageTourController {
         }
         file.name = `photo_${new Date().getTime()}_org${req.org.id}_${
           path.parse(file.name).ext
-        }`;
+          }`;
         imageUrl = `${process.env.IMAGE_URL}/${file.name}`;
         file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
           if (err) {
