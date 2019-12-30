@@ -84,7 +84,7 @@ export class UserAuthController {
       user.password = reqData.password;
       user.dob = new Date(Date.parse(reqData.dob));
       user.gender = reqData.gender;
-      user.phoneNumber = reqData.phoneNumber;
+      // user.phoneNumber = reqData.phoneNumber;
       user.validationNumber = Math.ceil(Math.random() * 10000);
       const errors = await validate(user);
       if (errors.length > 0) {
