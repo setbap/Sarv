@@ -55,7 +55,7 @@ export class ExploreToursController {
   static lastestTour = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
       const reqData = <lastTourInterface>req.body;
-      const pageCount = reqData.isTwelve ? 12 : 12; // if true 12 show 12 item per page else show 6 item
+      const pageCount = reqData.isTwelve ? 12 : 6; // if true 12 show 12 item per page else show 6 item
       const pageNumber =
         +reqData.pageNumber && +reqData.pageNumber > 0
           ? +reqData.pageNumber
@@ -148,7 +148,7 @@ export class ExploreToursController {
   static fullSearch = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
       const reqData = <fullSearchInterface>req.body;
-      const pageCount = reqData.isTwelve ? 12 : 12; // if true 12 show 12 item per page else show 6 item
+      const pageCount = reqData.isTwelve ? 12 : 6; // if true 12 show 12 item per page else show 6 item
       const queryData = {};
       const pageNumber =
         +reqData.pageNumber && +reqData.pageNumber > 0
