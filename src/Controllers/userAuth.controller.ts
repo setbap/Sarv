@@ -65,6 +65,8 @@ interface updateInfoInterface {
   name?: string;
   lastname?: string;
   dob?: Date;
+  gender?: UserGender;
+
 }
 
 interface authedChangePassInterface {
@@ -77,7 +79,6 @@ export class UserAuthController {
     async (req: Request, res: Response, next: NextFunction) => {
       const reqData = <UserInterface>req.body;
       const user = new NotRegUser();
-      console.log(Date.parse(reqData.dob));
       user.name = reqData.name;
       user.lastname = reqData.lastname;
       user.email = reqData.email;
@@ -287,6 +288,8 @@ export class UserAuthController {
       user.name = newInfo.name ? newInfo.name : user.name;
       user.lastname = newInfo.lastname ? newInfo.lastname : user.lastname;
       user.dob = newInfo.dob ? newInfo.dob : user.dob;
+      user.gender = newInfo.gender ? newInfo.gender : user.gender;
+      console.log(user)
       await user.save()
       return res.json({
         "status": "your info updated"
@@ -299,16 +302,20 @@ export class UserAuthController {
     async (req: RequestWithDecodedUser, res: Response, next: NextFunction) => {
       const user = await User.findOneOrFail(req.user.id)
       const reqData = <authedChangePassInterface>req.body;
-      const password = await bcrypt.hash(reqData.newPassword, 10);
-      if (user.password === password) {
-        const newPassword = await bcrypt.hash(reqData.newPassword, 10);
-        user.password === newPassword;
+      // const password = await bcrypt.hash(reqData.oldPassword, 10);
+      const pass = await bcrypt.compare(reqData.oldPassword, user.password);
+
+      if (pass && reqData.newPassword.length >= 8) {
+        user.password = await bcrypt.hash(reqData.newPassword, 10);
+        await user.save();
+        console.log("PP");
+
       } else {
-        return next(new ErrorResponse("wrong old password", 404));
+        return next(new ErrorResponse("wrong old password or new password is less than 8 char", 404));
       }
 
 
-      await user.save()
+
       return res.json({
         "status": "your password updated"
       })
