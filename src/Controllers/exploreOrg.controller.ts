@@ -275,7 +275,7 @@ export class ExploreOrgsController {
       await orgComment.save();
       await getConnection()
         .createQueryBuilder()
-        .update(Tour)
+        .update(TouristOrganization)
         .set({ commnetCount: () => '"commnetCount" + 1' })
         .where("id = :id", { id: reqData.orgId })
         .execute();
@@ -300,14 +300,24 @@ export class ExploreOrgsController {
         .leftJoinAndSelect("to.leaders", "tl")
         .leftJoinAndSelect("to.orgCreator", "oc")
         .select([
-          "to",
+          "to.id",
+          "to.name",
+          "to.description",
+          "to.email",
+          "to.image",
+          "to.commnetCount",
+          "to.rateCount",
+          "to.tourCount",
+          "to.rateAvg",
           "cmts",
           "tour.id",
           "tour.name",
-          "tour.startDate",
-          "tour.finishDate",
+          "tour.sourcePlace",
+          "tour.destinationPlace",
+          "tour.image",
           "tl.id",
           "tl.name",
+          "tl.image",
           "tl.lastname",
           "oc.id",
           "oc.name",
